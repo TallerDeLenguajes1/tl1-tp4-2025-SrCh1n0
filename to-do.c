@@ -18,10 +18,12 @@ struct Nodo
 Nodo *CrearListaVacia();
 Nodo *AgregarTarea(int tarea, char *buff, int duracion);
 void InsertarNodo(Nodo **Start , Nodo *Nodo);
+void MostrarLista(Nodo *Start);
+void LiberarMemoria(Nodo **Start);
 
 int main(){
 
-    Nodo * Inicio = CrearListaVacia();
+    Nodo * TareasPendientes = CrearListaVacia();
     int crearTarea = 0, tiempo, aux;
     char *buff;
     while (crearTarea >= 0)
@@ -32,7 +34,7 @@ int main(){
         gets(buff);
         printf("Ingrese la duracion (Entre 10 y 100): ");
         scanf("%d", &tiempo);
-        InsertarNodo(&Inicio, AgregarTarea((100 + crearTarea), buff, tiempo));
+        InsertarNodo(&TareasPendientes, AgregarTarea((1000 + crearTarea), buff, tiempo));
         free(buff);
         printf("Desea agregar una nueva tarea?(1 = agregar, 0 = terminar la carga): ");
         scanf("%d", &aux);
@@ -41,8 +43,11 @@ int main(){
             crearTarea = -1;
         } else {
             crearTarea++;
-        }     
+        }
     }
+    MostrarLista(TareasPendientes);
+    LiberarMemoria(&TareasPendientes);
+    printf("\nTodo listo.");
     return 0;
 }
 
@@ -62,11 +67,32 @@ Nodo *AgregarTarea(int tarea, char *buff, int duracion){
     nodo->T.Duracion = duracion;
     nodo->siguiente = NULL;
     return nodo;
-
 }
 
 void InsertarNodo(Nodo **Start, Nodo *Nodo)
 {
     Nodo->siguiente = *Start;
     *Start = Nodo ;
+}
+
+void MostrarLista(Nodo *Start){
+    Nodo * Aux = Start;
+  while (Aux)
+  {
+    printf("\n-----TAREA-----");
+    printf("\nId: %d", Aux->T.TareaID);
+    printf("\nDescripcion: ");
+    puts(Aux->T.Descripcion);
+    printf("\nDuracion: %d", Aux->T.Duracion);
+    Aux = Aux->siguiente;
+  }
+}
+
+void LiberarMemoria(Nodo **Start){
+Nodo ** Aux = Start;
+  while (*Aux) {
+    Nodo * temp = *Aux;
+    *Aux = (*Aux)->siguiente;
+    free(temp);
+  }
 }
