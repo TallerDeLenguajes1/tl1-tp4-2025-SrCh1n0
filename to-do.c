@@ -19,34 +19,54 @@ Nodo *CrearListaVacia();
 Nodo *AgregarTarea(int tarea, char *buff, int duracion);
 void InsertarNodo(Nodo **Start , Nodo *Nodo);
 void MostrarLista(Nodo *Start);
+Nodo * BuscarNodo(Nodo **Start, int dato);
+Nodo * QuitarNodo(Nodo ** Start,int dato);
 void LiberarMemoria(Nodo **Start);
 
 int main(){
-
     Nodo * TareasPendientes = CrearListaVacia();
-    int crearTarea = 0, tiempo, aux;
+    int crearTarea = 0, tiempo, aux, id;
     char *buff;
     while (crearTarea >= 0)
     {
-        buff = (char *) malloc(300*sizeof(char));
-        printf("Ingrese una descripcion de la tarea: ");
-        fflush(stdin);
-        gets(buff);
-        printf("Ingrese la duracion (Entre 10 y 100): ");
-        scanf("%d", &tiempo);
-        InsertarNodo(&TareasPendientes, AgregarTarea((1000 + crearTarea), buff, tiempo));
-        free(buff);
-        printf("Desea agregar una nueva tarea?(1 = agregar, 0 = terminar la carga): ");
-        scanf("%d", &aux);
-        if (aux == 0)
-        {
-            crearTarea = -1;
-        } else {
-            crearTarea++;
-        }
+      buff = (char *) malloc(300*sizeof(char));
+      printf("\nIngrese una descripcion de la tarea: ");
+      fflush(stdin);
+      gets(buff);
+      printf("\nIngrese la duracion (Entre 10 y 100): ");
+      scanf("%d", &tiempo);
+      InsertarNodo(&TareasPendientes, AgregarTarea((1000 + crearTarea), buff, tiempo));
+      free(buff);
+      printf("\nDesea agregar una nueva tarea?(1 = agregar, 0 = terminar la carga): ");
+      scanf("%d", &aux);
+      if (aux == 0)
+      {
+          crearTarea = -1;
+      } else {
+          crearTarea++;
+      }
     }
+    
+    Nodo * TareasRealizadas = CrearListaVacia();
+    int moverTarea;
+    do
+    {
+      Nodo * TareasRealizadas = CrearListaVacia();
+      printf("\nIngrese el id de la tarea realizada: ");
+      scanf("%d", &id);
+      Nodo * realizada = BuscarNodo(&TareasPendientes, id);
+      InsertarNodo(&TareasRealizadas, realizada);
+      QuitarNodo(&TareasPendientes, id);
+      printf("\nDesea agregar otra tarea a la lista de realizadas?(1 = agregar, 0 = terminar)");
+      scanf("%d", &moverTarea);
+    } while (moverTarea != 0);
+    printf("\n\nLista de Pendientes: ");
     MostrarLista(TareasPendientes);
+    printf("\n\nLista de Realizadas: ");
+    MostrarLista(TareasRealizadas);
+
     LiberarMemoria(&TareasPendientes);
+    LiberarMemoria(&TareasRealizadas);
     printf("\nTodo listo.");
     return 0;
 }
@@ -75,17 +95,44 @@ void InsertarNodo(Nodo **Start, Nodo *Nodo)
     *Start = Nodo ;
 }
 
-void MostrarLista(Nodo *Start){
-    Nodo * Aux = Start;
+void MostrarLista(Nodo *Tareas){
+    Nodo * Aux = Tareas;
   while (Aux)
   {
     printf("\n-----TAREA-----");
     printf("\nId: %d", Aux->T.TareaID);
     printf("\nDescripcion: ");
     puts(Aux->T.Descripcion);
-    printf("\nDuracion: %d", Aux->T.Duracion);
+    printf("Duracion: %d\n", Aux->T.Duracion);
     Aux = Aux->siguiente;
   }
+}
+
+Nodo * BuscarNodo(Nodo ** Start,int dato){
+    Nodo * Aux = *Start;
+  while (Aux && Aux->T.TareaID != dato)
+  {
+    Aux = Aux->siguiente;
+  }
+  return Aux;
+}
+
+Nodo * QuitarNodo(Nodo ** Tarea, int dato) {
+  Nodo ** aux = Tarea;  // Usamos un puntero doble para apuntar al puntero actual.
+  
+  // Iteramos sobre la lista hasta encontrar el dato o alcanzar el final de la lista.
+  while (*aux != NULL && (*aux)->T.TareaID != dato) {
+      aux = &(*aux)->siguiente;
+  }
+
+  // Si encontramos el nodo con el dato especificado, lo quitamos de la lista y retornamos al programa para su posterior eliminación.
+  if (*aux) {
+      Nodo *temp = *aux;  // Guardamos el nodo a eliminar en una variable temporal.
+      *aux = (*aux)->siguiente;  // Desvinculamos el nodo de la lista.
+      temp->siguiente =NULL; // Ponemos en NULL el puntero siguiente para asegura no llevar vinculos por fuera de la lista
+      return temp;
+  }
+  return NULL;
 }
 
 void LiberarMemoria(Nodo **Start){
