@@ -18,55 +18,138 @@ struct Nodo
 Nodo *CrearListaVacia();
 Nodo *AgregarTarea(int id, char *buff, int duracion);
 void InsertarTarea(Nodo **Lista , Nodo *Tarea);
+void MostrarTarea(Nodo *Tarea);
 void MostrarLista(Nodo *Lista);
-Nodo * BuscarTarea(Nodo **Tarea, int Id);
-Nodo * QuitarTarea(Nodo **Tarea, int Id);
+Nodo * BuscarTareaPorId(Nodo **Lista, int Id);
+Nodo * BuscarTareaPorPalabra(Nodo **Lista, char *Palabra);
+Nodo * QuitarTarea(Nodo **Lista, int Id);
 void LiberarMemoria(Nodo **lista);
 
 int main(){
     Nodo * TareasPendientes = CrearListaVacia();
-    int crearTarea = 0, tiempo, aux, id;
-    char *buff;
-    while (crearTarea >= 0)
-    {
-      buff = (char *) malloc(300*sizeof(char));
-      printf("\nIngrese una descripcion de la tarea: ");
-      fflush(stdin);
-      gets(buff);
-      printf("\nIngrese la duracion (Entre 10 y 100): ");
-      scanf("%d", &tiempo);
-      InsertarTarea(&TareasPendientes, AgregarTarea((1000 + crearTarea), buff, tiempo));
-      free(buff);
-      printf("\nDesea agregar una nueva tarea?\n(1 = agregar, 0 = terminar la carga): ");
-      scanf("%d", &aux);
-      if (aux == 0)
-      {
-          crearTarea = -1;
-      } else {
-          crearTarea++;
-      }
-    }
-    printf("\n\nLista de Pendientes: ");
-    MostrarLista(TareasPendientes);
     Nodo * TareasRealizadas = CrearListaVacia();
-    int moverTarea;
+    int crearTarea = 0, tiempo, aux, id, decision;
+    char *buff;
+    
     do
     {
       fflush(stdin);
-      printf("\nIngrese el id de la tarea realizada: ");
-      scanf("%d", &id);
-      Nodo * realizada = QuitarTarea(&TareasPendientes, id);
-      InsertarTarea(&TareasRealizadas, realizada);
-      
-      printf("\nDesea agregar otra tarea a la lista de realizadas?\n(1 = agregar, 0 = terminar)");
-      scanf("%d", &moverTarea);
-    } while (moverTarea != 0);
+      printf("\n\nQue operacion desea realizar?");
+      printf("\n[0]. Agregar una nueva tarea a Pendientes");
+      printf("\n[1]. Transferir tareas de la lista Pendientes a Realizadas");
+      printf("\n[2]. Mostrar las listas");
+      printf("\n[3]. Consultar tarea por id");
+      printf("\n[4]. Consultar tarea por palabra clave");
+      printf("\n[5]. Cerrar programa.");
+      printf("\nSeleccione una opcion: ");
+      scanf("%d", &decision);
+      switch (decision)
+      {
+      case 0:
+          do
+          {
+            buff = (char *) malloc(300*sizeof(char));
+            printf("\nIngrese una descripcion de la tarea: ");
+            fflush(stdin);
+            gets(buff);
+            printf("\nIngrese la duracion (Entre 10 y 100): ");
+            scanf("%d", &tiempo);
+            InsertarTarea(&TareasPendientes, AgregarTarea((1000 + crearTarea), buff, tiempo));
+            free(buff);
+            printf("\nDesea agregar una nueva tarea?\n(1 = agregar, 0 = terminar la carga): ");
+            scanf("%d", &aux);
+            if (aux != 0) crearTarea++;
+          } while (aux != 0);
+        break;
 
-    printf("\n\nLista de Pendientes: ");
-    MostrarLista(TareasPendientes);
-    printf("\n\nLista de Realizadas: ");
-    MostrarLista(TareasRealizadas);
+      case 1:
+          do
+          {
+            fflush(stdin);
+            printf("\nIngrese el id de la tarea realizada: ");
+            scanf("%d", &id);
+            Nodo * realizada = QuitarTarea(&TareasPendientes, id);
+            InsertarTarea(&TareasRealizadas, realizada);
+            
+            printf("\nDesea agregar otra tarea a la lista de realizadas?\n(1 = agregar, 0 = terminar)");
+            scanf("%d", &aux);
+          } while (aux != 0);
+        break;
 
+      case 2:
+          if (TareasPendientes != NULL || TareasRealizadas != NULL)
+          {
+            printf("\n\nLista de Pendientes: ");
+            MostrarLista(TareasPendientes);
+            printf("\n\nLista de Realizadas: ");
+            MostrarLista(TareasRealizadas);
+          } else
+          {
+            printf("\nSin tareas para mostrar");
+          }   
+        break;
+
+      case 3:
+          if (TareasPendientes != NULL || TareasRealizadas != NULL)
+          {
+              fflush(stdin);
+              printf("\nIngrese el id para buscar la tarea: ");
+              scanf("%d", &id);
+              Nodo * TareaPorId = BuscarTareaPorId(&TareasPendientes, id);
+              if (TareaPorId != NULL)
+              {
+                  printf("\nLa tarea esta pendiente:");
+                  MostrarTarea(TareaPorId);
+              } else {
+                  TareaPorId = BuscarTareaPorId(&TareasRealizadas, id);
+                  if (TareaPorId != NULL)
+                  {
+                    printf("\nLa tarea esta realizada:");
+                    MostrarTarea(TareaPorId);
+                  } else {
+                  printf("\nNo se enontro la tarea.");
+                }
+              }
+          } else
+          {
+            printf("\nSin tareas para mostrar");
+          }   
+        break;
+
+      case 4:
+          if (TareasPendientes != NULL || TareasRealizadas != NULL)
+          {
+            fflush(stdin);
+            buff = (char *) malloc(300*sizeof(char));
+            printf("\nIngrese una palabra clave para buscar la tarea: ");
+            gets(buff);
+            Nodo * TareaPorPalabra = BuscarTareaPorPalabra(&TareasPendientes, buff);
+            if (TareaPorPalabra != NULL)
+            {
+                printf("\nLa tarea esta pendiente:");
+                MostrarTarea(TareaPorPalabra);
+            } else {
+                TareaPorPalabra = BuscarTareaPorPalabra(&TareasRealizadas, buff);
+                if (TareaPorPalabra != NULL)
+                {
+                  printf("\nLa tarea esta realizada:");
+                  MostrarTarea(TareaPorPalabra);
+                } else {
+                printf("\nNo se enontro la tarea.");
+              }
+            }
+            free(buff);
+          } else
+          {
+            printf("\nSin tareas para mostrar");
+          }  
+        break;
+
+      default:
+        break;
+      }
+
+    } while (decision != 5);
     LiberarMemoria(&TareasPendientes);
     LiberarMemoria(&TareasRealizadas);
     printf("\nTodo listo.");
@@ -97,26 +180,40 @@ void InsertarTarea(Nodo **Lista, Nodo *Tarea)
     *Lista = Tarea ;
 }
 
-void MostrarLista(Nodo *Lista){
-  Nodo * Aux = Lista;
-  while (Aux)
-  {
-    printf("\n-----TAREA-----");
-    printf("\nId: %d", Aux->T.TareaID);
-    printf("\nDescripcion: ");
-    puts(Aux->T.Descripcion);
-    printf("Duracion: %d\n", Aux->T.Duracion);
-    Aux = Aux->siguiente;
-  }
+void MostrarTarea(Nodo *Tarea){
+  Nodo * Aux = Tarea;
+  printf("\n-----TAREA-----");
+  printf("\nId: %d", Aux->T.TareaID);
+  printf("\nDescripcion: ");
+  puts(Aux->T.Descripcion);
+  printf("Duracion: %d\n", Aux->T.Duracion);
 }
 
-Nodo * BuscarTarea(Nodo ** Tarea,int Id){
-    Nodo * Aux = *Tarea;
-  while (Aux && Aux->T.TareaID != Id)
-  {
-    Aux = Aux->siguiente;
-  }
-  return Aux;
+void MostrarLista(Nodo *Lista){
+    Nodo * Aux = Lista;
+    while (Aux)
+    {
+        MostrarTarea(Aux);
+        Aux = Aux->siguiente;
+    }
+}
+
+Nodo * BuscarTareaPorId(Nodo ** Lista,int Id){
+    Nodo * Aux = *Lista;
+    while (Aux && Aux->T.TareaID != Id)
+    {
+        Aux = Aux->siguiente;
+    }
+    return Aux;
+}
+
+Nodo * BuscarTareaPorPalabra(Nodo **Lista, char *Palabra){
+    Nodo * Aux = *Lista;
+    while (Aux && strstr(Aux->T.Descripcion, Palabra) == NULL)
+    {
+        Aux = Aux->siguiente;
+    }
+    return Aux;
 }
 
 Nodo * QuitarTarea(Nodo **Tarea, int Id)
